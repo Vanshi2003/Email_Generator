@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Email Sender</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .loading {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-white mb-2">🤖 AI Email Sender</h1>
+            <p class="text-white/80">Generate and send personalized emails with AI</p>
+        </div>
+
+        <!-- Main Application -->
+        <div class="max-w-4xl mx-auto glass-effect rounded-2xl p-6 shadow-2xl">
+            <!-- Step 1: Recipients Input -->
+            <div class="mb-8">
+                <h2 class="text-2xl font-semibold text-white mb-4">📧 Recipients</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-white/90 mb-2">Email Recipients (comma-separated):</label>
+                        <textarea 
+                            id="recipients"
+                            class="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                            rows="3"
+                            placeholder="john@example.com, jane@example.com, team@company.com"
+                        ></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-white/90 mb-2">Subject:</label>
+                        <input 
+                            type="text"
+                            id="subject"
+                            class="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                            placeholder="Enter email subject"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: AI Prompt Input -->
+            <div class="mb-8">
+                <h2 class="text-2xl font-semibold text-white mb-4">🎯 Email Prompt</h2>
+                <div>
+                    <label class="block text-white/90 mb-2">Describe the email you want to generate:</label>
+                    <textarea 
+                        id="prompt"
+                        class="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                        rows="4"
+                        placeholder="e.g., Write a professional follow-up email for a job interview, thanking the interviewer and expressing continued interest in the position"
+                    ></textarea>
+                </div>
+                <button 
+                    id="generateBtn"
+                    class="mt-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                >
+                    <span id="generateText">✨ Generate Email</span>
+                    <span id="generateLoading" class="hidden">
+                        <div class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full loading mr-2"></div>
+                        Generating...
+                    </span>
+                </button>
+            </div>
+
+            <!-- Step 3: Generated Email (Initially Hidden) -->
+            <div id="emailSection" class="mb-8 hidden fade-in">
+                <h2 class="text-2xl font-semibold text-white mb-4">📝 Generated Email</h2>
+                <div class="bg-white/5 border border-white/20 rounded-lg p-4">
+                    <textarea 
+                        id="generatedEmail"
+                        class="w-full p-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                        rows="12"
+                        placeholder="Your generated email will appear here..."
+                    ></textarea>
+                    <div class="mt-4 flex gap-4">
+                        <button 
+                            id="regenerateBtn"
+                            class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                        >
+                            🔄 Regenerate
+                        </button>
+                        <button 
+                            id="sendBtn"
+                            class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-2 rounded-lg font-medium hover:from-green-600 hover:to-emerald-700 transition-all duration-200 shadow-lg"
+                        >
+                            <span id="sendText">📨 Send Email</span>
+                            <span id="sendLoading" class="hidden">
+                                <div class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full loading mr-2"></div>
+                                Sending...
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Messages -->
+            <div id="statusMessage" class="hidden p-4 rounded-lg mb-4"></div>
+        </div>
+    </div>
+
+    <script>
+        // Simulated AI email generation (replace with actual AI API)
+        async function generateEmailWithAI(prompt) {
+            // Simulate API call delay
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            // Mock AI-generated content based on prompt
+            const templates = {
+                'follow-up': `Dear Hiring Manager,
+
+I hope this email finds you well. I wanted to take a moment to thank you for the opportunity to interview for the position at your company yesterday.
+
+I was particularly excited to learn more about the role and how it aligns with my skills and career goals. Our conversation reinforced my enthusiasm for joining your team and contributing to the company's success.
+
+I appreciate the time you took to discuss the position in detail and answer my questions. If you need any additional information from me, please don't hesitate to reach out.
+
+I look forward to hearing about the next steps in the process.
+
+Best regards,
+[Your Name]`,
+                'meeting': `Dear Team,
+
+I hope you're all doing well. I'd like to schedule a team meeting to discuss our upcoming project milestones and align on our next steps.
+
+The meeting will cover:
+- Project progress review
+- Upcoming deadlines
+- Resource allocation
+- Q&A session
+
+Please let me know your availability for next week, and I'll send out a calendar invite accordingly.
+
+Thank you for your continued hard work and dedication.
+
+Best regards,
+[Your Name]`,
+                'default': `Dear Recipient,
+
+I hope this message finds you well.
+
+${prompt}
+
+Thank you for your time and consideration.
+
+Best regards,
+[Your Name]`
+            };
+
+            // Simple keyword matching for demo
+            if (prompt.toLowerCase().includes('interview') || prompt.toLowerCase().includes('follow-up')) {
+                return templates['follow-up'];
+            } else if (prompt.toLowerCase().includes('meeting') || prompt.toLowerCase().includes('schedule')) {
+                return templates['meeting'];
+            } else {
+                return templates['default'];
+            }
+        }
+
+        // Simulated email sending (replace with actual email service)
+        async function sendEmail(recipients, subject, content) {
+            // Simulate API call delay
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            // Validate email format
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const emails = recipients.split(',').map(email => email.trim());
+            const invalidEmails = emails.filter(email => !emailRegex.test(email));
+            
+            if (invalidEmails.length > 0) {
+                throw new Error(`Invalid email addresses: ${invalidEmails.join(', ')}`);
+            }
+            
+            // Simulate success
+            return {
+                success: true,
+                sentTo: emails.length,
+                message: `Email sent successfully to ${emails.length} recipient(s)`
+            };
+        }
+
+        // UI Handlers
+        function showStatus(message, type = 'success') {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.className = `p-4 rounded-lg mb-4 ${type === 'success' ? 'bg-green-500/20 text-green-100 border border-green-500/30' : 'bg-red-500/20 text-red-100 border border-red-500/30'}`;
+            statusEl.textContent = message;
+            statusEl.classList.remove('hidden');
+            
+            setTimeout(() => {
+                statusEl.classList.add('hidden');
+            }, 5000);
+        }
+
+        function setLoadingState(buttonId, textId, loadingId, isLoading) {
+            const button = document.getElementById(buttonId);
+            const text = document.getElementById(textId);
+            const loading = document.getElementById(loadingId);
+            
+            button.disabled = isLoading;
+            button.classList.toggle('opacity-50', isLoading);
+            text.classList.toggle('hidden', isLoading);
+            loading.classList.toggle('hidden', !isLoading);
+        }
+
+        // Event Listeners
+        document.getElementById('generateBtn').addEventListener('click', async () => {
+            const prompt = document.getElementById('prompt').value.trim();
+            
+            if (!prompt) {
+                showStatus('Please enter a prompt for the email generation.', 'error');
+                return;
+            }
+
+            try {
+                setLoadingState('generateBtn', 'generateText', 'generateLoading', true);
+                
+                const generatedContent = await generateEmailWithAI(prompt);
+                
+                document.getElementById('generatedEmail').value = generatedContent;
+                document.getElementById('emailSection').classList.remove('hidden');
+                
+                showStatus('Email generated successfully! You can now edit it before sending.');
+                
+            } catch (error) {
+                showStatus('Error generating email: ' + error.message, 'error');
+            } finally {
+                setLoadingState('generateBtn', 'generateText', 'generateLoading', false);
+            }
+        });
+
+        document.getElementById('regenerateBtn').addEventListener('click', () => {
+            document.getElementById('generateBtn').click();
+        });
+
+        document.getElementById('sendBtn').addEventListener('click', async () => {
+            const recipients = document.getElementById('recipients').value.trim();
+            const subject = document.getElementById('subject').value.trim();
+            const content = document.getElementById('generatedEmail').value.trim();
+            
+            if (!recipients) {
+                showStatus('Please enter recipient email addresses.', 'error');
+                return;
+            }
+            
+            if (!subject) {
+                showStatus('Please enter an email subject.', 'error');
+                return;
+            }
+            
+            if (!content) {
+                showStatus('Please generate an email first.', 'error');
+                return;
+            }
+
+            try {
+                setLoadingState('sendBtn', 'sendText', 'sendLoading', true);
+                
+                const result = await sendEmail(recipients, subject, content);
+                
+                if (result.success) {
+                    showStatus(result.message);
+                    
+                    // Reset form after successful send
+                    setTimeout(() => {
+                        document.getElementById('recipients').value = '';
+                        document.getElementById('subject').value = '';
+                        document.getElementById('prompt').value = '';
+                        document.getElementById('generatedEmail').value = '';
+                        document.getElementById('emailSection').classList.add('hidden');
+                    }, 2000);
+                }
+                
+            } catch (error) {
+                showStatus('Error sending email: ' + error.message, 'error');
+            } finally {
+                setLoadingState('sendBtn', 'sendText', 'sendLoading', false);
+            }
+        });
+
+        // Auto-resize textareas
+        document.querySelectorAll('textarea').forEach(textarea => {
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = this.scrollHeight + 'px';
+            });
+        });
+    </script>
+</body>
+</html>
